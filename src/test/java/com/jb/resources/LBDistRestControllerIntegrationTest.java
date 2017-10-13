@@ -19,17 +19,13 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.net.URL;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class LBDistRestControllerIT {
-    private static final String INPUT_FILE_NAME = "src/test/resources/testFile.csv";
-    private Path path;
+public class LBDistRestControllerIntegrationTest {
 
     @LocalServerPort
     private int port;
@@ -42,9 +38,6 @@ public class LBDistRestControllerIT {
     @Before
     public void setUp() throws Exception {
         this.base = new URL("http://localhost:" + port + "/");
-
-        path = FileSystems.getDefault().getPath(INPUT_FILE_NAME);
-
     }
 
     @Test
@@ -58,7 +51,7 @@ public class LBDistRestControllerIT {
     public void shouldGenerateChart() throws Exception {
         ClassPathResource resource = new ClassPathResource("testFile.csv", getClass());
 
-        MultiValueMap<String, Object> map = new LinkedMultiValueMap<String, Object>();
+        MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
         map.add("file", resource);
         ResponseEntity<Resource> response = template.postForEntity("/", map,
                 Resource.class);
@@ -72,7 +65,19 @@ public class LBDistRestControllerIT {
     public void shouldThrowBadRequestWhenMissingColumn() throws Exception {
         ClassPathResource resource = new ClassPathResource("testFile_missing_column.csv", getClass());
 
-        MultiValueMap<String, Object> map = new LinkedMultiValueMap<String, Object>();
+        MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+        map.add("file", resource);
+        ResponseEntity<Resource> response = template.postForEntity("/", map,
+                Resource.class);
+
+        Assertions.assertThat(response.getStatusCode()).isEqualByComparingTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void shouldThrowBadRequestWhenInvalidInputFile() throws Exception {
+        ClassPathResource resource = new ClassPathResource("image_invalid_format.png", getClass());
+
+        MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
         map.add("file", resource);
         ResponseEntity<Resource> response = template.postForEntity("/", map,
                 Resource.class);

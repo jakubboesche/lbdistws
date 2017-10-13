@@ -30,24 +30,17 @@ public class LBDistRestController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.IMAGE_PNG_VALUE)
-    public ResponseEntity<Resource> generateHistogram(@RequestBody MultipartFile file) {
+    public ResponseEntity<Resource> generateHistogram(@RequestBody MultipartFile file) throws IOException {
         LastByteDistributionProcessor processor = new LastByteDistributionProcessor();
-        Map<LBClass, Map<Long, Double>> statistics;
-        try {
-            statistics = processor.calculateStatistics(
-                    processor.parse(new BufferedReader(new InputStreamReader(file.getInputStream())).lines()));
-            ByteArrayOutputStream chartStream = LBChartCreator.createChartStream(statistics);
-            return ResponseEntity.ok()
-                    .body(new ByteArrayResource(chartStream.toByteArray()));
-        } catch (IOException e) {
-            return ResponseEntity.badRequest()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(new ByteArrayResource(e.getMessage().getBytes()));
-        }
+        Map<LBClass, Map<Long, Double>> statistics = processor.calculateStatistics(
+                processor.parse(new BufferedReader(new InputStreamReader(file.getInputStream())).lines()));
+        ByteArrayOutputStream chartStream = LBChartCreator.createChartStream(statistics);
+        return ResponseEntity.ok()
+                .body(new ByteArrayResource(chartStream.toByteArray()));
     }
 
     @ExceptionHandler(InvalidFileFormatException.class)
-    public ResponseEntity<?> handleInvalidFileFormat(InvalidFileFormatException exc) {
+    public ResponseEntity<?> handleInvalidFileFormat(InvalidFileFormatException e) {
         return ResponseEntity.badRequest().build();
     }
 }
