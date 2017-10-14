@@ -1,19 +1,16 @@
 package com.jb.resources;
 
-import com.jb.InvalidFileFormatException;
-import com.jb.LBChartCreator;
-import com.jb.LBClass;
-import com.jb.LastByteDistributionProcessor;
+import com.jb.*;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -29,18 +26,28 @@ public class LBDistRestController {
         return "uploadForm";
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.IMAGE_PNG_VALUE)
+    @PostMapping
     public ResponseEntity<Resource> generateHistogram(@RequestBody MultipartFile file) throws IOException {
-        LastByteDistributionProcessor processor = new LastByteDistributionProcessor();
-        Map<LBClass, Map<Long, Double>> statistics = processor.calculateStatistics(
-                processor.parse(new BufferedReader(new InputStreamReader(file.getInputStream())).lines()));
-        ByteArrayOutputStream chartStream = LBChartCreator.createChartStream(statistics);
+        ByteArrayOutputStream chartStream = LBChartCreator
+                .createChartStream(calculateHistogram(file));
         return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
                 .body(new ByteArrayResource(chartStream.toByteArray()));
     }
 
-    @ExceptionHandler(InvalidFileFormatException.class)
-    public ResponseEntity<?> handleInvalidFileFormat(InvalidFileFormatException e) {
-        return ResponseEntity.badRequest().build();
+    @PostMapping(path = "/json")
+    @ResponseBody
+    public Map<LBClass, Map<Long, Double>> generateHistogramJson(@RequestBody MultipartFile file) throws IOException {
+        return calculateHistogram(file);
+    }
+
+    private Map<LBClass, Map<Long, Double>> calculateHistogram(@RequestBody MultipartFile file) throws IOException {
+        try {
+            LastByteDistributionProcessor processor = new LastByteDistributionProcessor();
+            return processor.calculateStatistics(
+                    processor.parse(new BufferedReader(new InputStreamReader(file.getInputStream())).lines()));
+        } catch (InvalidFileFormatException e) {
+            throw new InvalidFileFormatWSException();
+        }
     }
 }

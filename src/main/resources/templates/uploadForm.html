@@ -10,7 +10,7 @@ http_status,obj_sz,req_time,transfer_time,ts,turn_time<br/>
 e.g.: 200,600000,2,2048,123.456,5<br/>
 
 <div>
-    <form method="POST" enctype="multipart/form-data" action="/">
+    <form method="POST" enctype="multipart/form-data" action="/" name="uploadForm">
         <table>
             <tr>
                 <td>File to upload:</td>
@@ -21,9 +21,24 @@ e.g.: 200,600000,2,2048,123.456,5<br/>
             <tr>
                 <td><input type="submit" value="Upload"/></td>
             </tr>
+            <tr>
+                <td>
+                    <input type="radio" name="outputType" value="png"
+                           onclick="changeAction('/')" checked="checked"/>PNG<br/>
+                    <input type="radio" name="outputType" value="json"
+                           onclick="changeAction('/json')"/>JSON
+                </td>
+            </tr>
         </table>
     </form>
 </div>
 
+<script type="text/javascript">
+//<![CDATA[
+function changeAction(action) {
+    document.uploadForm.action = action;
+}
+//]]>
+</script>
 </body>
 </html>
