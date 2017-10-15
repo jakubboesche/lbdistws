@@ -102,15 +102,7 @@ public class LBDistRestControllerIntegrationTest {
 
         Assertions.assertThat(response.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
         Assertions.assertThat(response.getBody().length()).isGreaterThan(1);
-        JsonAssert.with(response.getBody()).assertThat("$.LESSTHAN100kB.1", equalTo(10.0));
-        JsonAssert.with(response.getBody()).assertThat("$.LESSTHAN100kB.6", equalTo(20.0));
-        JsonAssert.with(response.getBody()).assertThat("$.LESSTHAN100kB.41", equalTo(10.0));
-        JsonAssert.with(response.getBody()).assertThat("$.LESSTHAN100kB.61", equalTo(10.0));
-        JsonAssert.with(response.getBody()).assertThat("$.BETWEEN100kBAND1MB.769", equalTo(10.0));
-        JsonAssert.with(response.getBody()).assertThat("$.BETWEEN100kBAND1MB.2055", equalTo(10.0));
         JsonAssert.with(response.getBody()).assertThat("$.BETWEEN100kBAND1MB.7931", equalTo(20.0));
-        JsonAssert.with(response.getBody()).assertThat("$.BETWEEN100kBAND1MB.30229", equalTo(10.0));
-
     }
 
     @Test
