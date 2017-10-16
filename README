@@ -1,0 +1,12 @@
+LBDistWS is a web interface for the LastByteDistribution library (https://github.com/jakubboesche/lbdist)
+
+Compilation:
+mvn package
+
+Running (Spring Boot):
+mvn spring-boot:run
+open http://localhost:8080
+
+API:
+1. POST "/" (consumes a multipart CSV file upload in the provided format, produces a PNG image with a histogram)
+2. POST "/json" (consumes a multipart CSV file upload produces a JSON output with a histogram)
