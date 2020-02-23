@@ -2,7 +2,6 @@ package com.jb.resources;
 
 
 import com.jayway.jsonassert.JsonAssert;
-import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,9 +21,8 @@ import org.springframework.util.MultiValueMap;
 
 import java.net.URL;
 
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -43,10 +41,9 @@ public class LBDistRestControllerIntegrationTest {
     }
 
     @Test
-    public void shouldGetForm() throws Exception {
-        ResponseEntity<String> response = template.getForEntity(base.toString(),
-                String.class);
-        assertThat(response.getBody(), containsString("File format: CSV, columns"));
+    public void shouldGetForm() {
+        ResponseEntity<String> response = template.getForEntity(base.toString(), String.class);
+        assertThat(response.getBody()).contains("File format: CSV, columns");
     }
 
     @Test
@@ -58,76 +55,71 @@ public class LBDistRestControllerIntegrationTest {
         ResponseEntity<Resource> response = template.postForEntity("/", map,
                 Resource.class);
 
-        Assertions.assertThat(response.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
-        Assertions.assertThat(response.getBody()).isOfAnyClassIn(ByteArrayResource.class);
-        Assertions.assertThat(response.getBody().contentLength()).isGreaterThan(10000);
+        assertThat(response.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
+        assertThat(response.getBody()).isOfAnyClassIn(ByteArrayResource.class);
+        assertThat(response.getBody().contentLength()).isGreaterThan(10000);
     }
 
     @Test
     @Parameters
-    public void shouldThrowBadRequestWhenMissingColumn() throws Exception {
+    public void shouldThrowBadRequestWhenMissingColumn() {
         ClassPathResource resource = new ClassPathResource("testFile_missing_column.csv", getClass());
 
         MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
         map.add("file", resource);
-        ResponseEntity<String> response = template.postForEntity("/", map,
-                String.class);
+        ResponseEntity<String> response = template.postForEntity("/", map, String.class);
 
-        Assertions.assertThat(response.getStatusCode()).isEqualByComparingTo(HttpStatus.BAD_REQUEST);
-        Assertions.assertThat(response.getBody()).containsIgnoringCase("invalid file format");
+        assertThat(response.getStatusCode()).isEqualByComparingTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).containsIgnoringCase("invalid file format");
     }
 
     @Test
     @Parameters
-    public void shouldThrowBadRequestWhenInvalidInputFile() throws Exception {
+    public void shouldThrowBadRequestWhenInvalidInputFile() {
         ClassPathResource resource = new ClassPathResource("image_invalid_format.png", getClass());
 
         MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
         map.add("file", resource);
-        ResponseEntity<String> response = template.postForEntity("/", map,
-                String.class);
+        ResponseEntity<String> response = template.postForEntity("/", map, String.class);
 
-        Assertions.assertThat(response.getStatusCode()).isEqualByComparingTo(HttpStatus.BAD_REQUEST);
-        Assertions.assertThat(response.getBody()).containsIgnoringCase("invalid file format");
+        assertThat(response.getStatusCode()).isEqualByComparingTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).containsIgnoringCase("invalid file format");
     }
 
     @Test
-    public void shouldGenerateJson() throws Exception {
+    public void shouldGenerateJson() {
         ClassPathResource resource = new ClassPathResource("testFile.csv", getClass());
 
         MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
         map.add("file", resource);
-        ResponseEntity<String> response = template.postForEntity("/json", map,
-                String.class);
+        ResponseEntity<String> response = template.postForEntity("/json", map, String.class);
 
-        Assertions.assertThat(response.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
-        Assertions.assertThat(response.getBody().length()).isGreaterThan(1);
+        assertThat(response.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
+        assertThat(response.getBody().length()).isGreaterThan(1);
         JsonAssert.with(response.getBody()).assertThat("$.BETWEEN100kBAND1MB.7931", equalTo(20.0));
     }
 
     @Test
-    public void shouldThrowBadRequestGeneratingJsonWhenMissingColumn() throws Exception {
+    public void shouldThrowBadRequestGeneratingJsonWhenMissingColumn() {
         ClassPathResource resource = new ClassPathResource("testFile_missing_column.csv", getClass());
 
         MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
         map.add("file", resource);
-        ResponseEntity<String> response = template.postForEntity("/json", map,
-                String.class);
+        ResponseEntity<String> response = template.postForEntity("/json", map, String.class);
 
-        Assertions.assertThat(response.getStatusCode()).isEqualByComparingTo(HttpStatus.BAD_REQUEST);
-        Assertions.assertThat(response.getBody()).containsIgnoringCase("invalid file format");
+        assertThat(response.getStatusCode()).isEqualByComparingTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).containsIgnoringCase("invalid file format");
     }
 
     @Test
-    public void shouldThrowBadRequestGeneratingJsonWhenInvalidInputFile() throws Exception {
+    public void shouldThrowBadRequestGeneratingJsonWhenInvalidInputFile() {
         ClassPathResource resource = new ClassPathResource("image_invalid_format.png", getClass());
 
         MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
         map.add("file", resource);
-        ResponseEntity<String> response = template.postForEntity("/json", map,
-                String.class);
+        ResponseEntity<String> response = template.postForEntity("/json", map, String.class);
 
-        Assertions.assertThat(response.getStatusCode()).isEqualByComparingTo(HttpStatus.BAD_REQUEST);
-        Assertions.assertThat(response.getBody()).containsIgnoringCase("invalid file format");
+        assertThat(response.getStatusCode()).isEqualByComparingTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).containsIgnoringCase("invalid file format");
     }
 }
